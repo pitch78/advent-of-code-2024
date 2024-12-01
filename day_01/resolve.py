@@ -24,7 +24,8 @@ class TodaysPuzzle(Puzzle):
         self.right_list.sort()
 
     def solve_step2(self) -> tuple[str | None, bool]:
-        return None, False
+        self.load_columns()
+        return self.get_similarity(), True
 
     def get_total_distance(self):
         total_distance = 0
@@ -32,6 +33,14 @@ class TodaysPuzzle(Puzzle):
             delta: int = abs(self.left_list[index] - self.right_list[index])
             total_distance += delta
         return total_distance
+
+    def get_similarity(self):
+        similarity = 0
+        for item in self.left_list:
+            nb_current_item_found = len([item_found for item_found in self.right_list if item_found == item])
+            # print(f"{item} => {nb_current_item_found}")
+            similarity += item * nb_current_item_found
+        return similarity
 
 
 if __name__ == "__main__":
