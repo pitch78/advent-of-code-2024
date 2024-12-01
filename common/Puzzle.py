@@ -1,8 +1,6 @@
 import os.path
 from time import time
 
-from IPython.core.display_functions import display
-
 from common.Mode import Mode
 from common.Step import Step
 
