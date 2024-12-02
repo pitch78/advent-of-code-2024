@@ -27,14 +27,14 @@ class Puzzle:
             print(item)
 
     # Wrapper around, current day solvers. Handle execution timing and response display
-    def resolve(self):
+    def resolve(self, expected_result: int = None) -> None:
         start = time()
         if self.step == Step.STEP_1:
             solution, found = self.solve_step1()
         else:
             solution, found = self.solve_step2()
         end = time()
-        self.__display_current_solution(solution, found, end - start)
+        self.__display_current_solution(expected_result, solution, found, end - start)
 
     # No response, no solution found
     def solve_step1(self) -> tuple[str | None, bool]:
@@ -68,10 +68,13 @@ class Puzzle:
         if force_test_mode:
             self.test_mode()
 
-    def __display_current_solution(self, solution: str | None, found: bool, duration: float):
-        if found:
+    def __display_current_solution(self, expected_result: int | None, solution: int, found: bool, duration: float):
+        if found and (expected_result is None or expected_result == solution):
             duration_str: str = "" if self.mode == Mode.TEST else f" (in {duration:.2f}s)"
             print(f"Part#{self.step.value} {self.mode.value} {duration_str}:\n{solution}")
+        elif expected_result is not None and expected_result != solution:
+            print(f"Part#{self.step.value} {self.mode.value} 😩:\nExpected: {expected_result}\nGot: {solution}")
+            exit();
         else:
-            print(f"Part#{self.step.value} {self.mode.value}: You can do it 💪🏻")
+            print(f"Part#{self.step.value} {self.mode.value}:\nYou can do it 💪🏻")
             exit();

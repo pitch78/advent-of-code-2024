@@ -38,7 +38,6 @@ class TodaysPuzzle(Puzzle):
         similarity = 0
         for item in self.left_list:
             nb_current_item_found = len([item_found for item_found in self.right_list if item_found == item])
-            # print(f"{item} => {nb_current_item_found}")
             similarity += item * nb_current_item_found
         return similarity
 
@@ -46,7 +45,7 @@ class TodaysPuzzle(Puzzle):
 if __name__ == "__main__":
     # starting step_1, test_mode
     today_s_puzzle = TodaysPuzzle()
-    today_s_puzzle.resolve()
+    today_s_puzzle.resolve(11)
 
     # then step_1, prod_mode
     today_s_puzzle.prod_mode()
@@ -56,7 +55,7 @@ if __name__ == "__main__":
     print()
     # then step_2, test_mode
     today_s_puzzle.step2()
-    today_s_puzzle.resolve()
+    today_s_puzzle.resolve(31)
 
     # then step_2, prod_mode
     today_s_puzzle.prod_mode()
