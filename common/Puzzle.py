@@ -26,6 +26,12 @@ class Puzzle:
         for item in self.raw_items:
             print(item)
 
+    def get_data_as_array(self) -> list[list[str]]:
+        result: list[list[str]] = []
+        for line in self.raw_items:
+            result.append(list(line))
+        return result
+
     # Wrapper around, current day solvers. Handle execution timing and response display
     def resolve(self, expected_result: int = None) -> None:
         start = time()
