@@ -7,7 +7,6 @@ class TodaysPuzzle(Puzzle):
 
     def solve_step1(self) -> tuple[str | None, bool]:
         # Loading rules and updates
-        is_rule = True
         rules: list[list[str]] = []
         updates: list[list[str]] = []
         is_rule: bool = True
@@ -43,7 +42,6 @@ class TodaysPuzzle(Puzzle):
 
     def solve_step2(self) -> tuple[str | None, bool]:
         # Loading rules and updates
-        is_rule = True
         rules: list[list[str]] = []
         updates: list[list[str]] = []
         is_rule: bool = True

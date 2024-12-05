@@ -6,6 +6,8 @@ import shutil
 import numpy as np
 import requests
 
+from common.Loader import Loader
+
 my_aoc_cookie: str = "53616c7465645f5f017253dfa9178e7b198b889953ea989d7ba95ed98fb89fe07a44fa5971b1edb19040f736b7532ffc686f37a7a8babf7e30b853d80f3e5370"
 current_aoc_year = 2024
 
@@ -38,9 +40,9 @@ def __create_new_puzzle_folder(new_puzzle_day_number) -> None:
     if new_puzzle_day_number > 24:
         print("See you next year 🥳")
         exit()
-    print(f"Creating new folder for day {new_puzzle_day_number}...", end="")
+    folder_loader = Loader(f"Creating new folder for day {new_puzzle_day_number}...").start()
     shutil.copytree('day_skeleton', f"day_{new_puzzle_day_number:02}")
-    print("created.")
+    folder_loader.stop("created.")
 
 
 def __check_prod_input(new_puzzle_day_number):
@@ -49,14 +51,15 @@ def __check_prod_input(new_puzzle_day_number):
 
 
 def __dl_last_day_input(last_day):
-    print(f"Downloading input for day {last_day}...")
+    dl_loader = Loader(f"Downloading input for day {last_day}...").start()
     aoc_input_url = f"https://adventofcode.com/{current_aoc_year}/day/{last_day}/input"
     aoc_input_response = requests.get(aoc_input_url, cookies={"session": my_aoc_cookie})
     if aoc_input_response.status_code != 200:
-        print(f"Day {last_day:02} input not available")
+        dl_loader.stop(f"Not available", False)
         return
     with open(f"day_{last_day:02}/input", 'w') as input_file:
         input_file.write(aoc_input_response.text)
+    dl_loader.stop()
 
 
 def __last_day_inputs_ok(last_day):
