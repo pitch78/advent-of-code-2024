@@ -19,7 +19,7 @@ class Puzzle:
             step_2_extension = "_2"
 
         with open(f"./input{'' if self.mode == Mode.PROD else '_test'}{step_2_extension}", "r") as input_file:
-            self.raw_items = [item for item in input_file.read().split(self.split_by) if len(item.strip()) > 0]
+            self.raw_items = [item for item in input_file.read().split(self.split_by)]
 
     # Debug helper, not supposed to be used in regular usage
     def display_raw_data(self):
