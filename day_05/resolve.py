@@ -19,9 +19,6 @@ class TodaysPuzzle(Puzzle):
                 rules.append(line.strip().split("|"))
             else:
                 updates.append(line.strip().split(","))
-        # last empty line
-        if len(updates[-1]) != 2:
-            del updates[-1]
 
         # Solving the puzzle
         result = 0

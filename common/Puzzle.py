@@ -21,10 +21,18 @@ class Puzzle:
         with open(f"./input{'' if self.mode == Mode.PROD else '_test'}{step_2_extension}", "r") as input_file:
             self.raw_items = [item for item in input_file.read().split(self.split_by)]
 
+            #remove trailing blank lines
+            while len(self.raw_items[-1].strip()) == 0:
+                del self.raw_items[-1]
+
     # Debug helper, not supposed to be used in regular usage
     def display_raw_data(self):
         for item in self.raw_items:
             print(item)
+
+    def display_area(self):
+        for item in self.area:
+            print("".join(item))
 
     def get_data_as_array(self) -> list[list[str]]:
         result: list[list[str]] = []
