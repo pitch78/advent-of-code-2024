@@ -26,7 +26,7 @@ class TodaysPuzzle(Puzzle):
 
     def solve_step2(self) -> tuple[int | None, bool]:
         self.area = self.get_data_as_array()
-        return self.get_guard_block_to_loop_positions(), True
+        return self.get_guard_block_to_loop_positions_count(), True
 
     def find_guard_position(self) -> tuple[tuple[int, int], Direction] | None:
         directions = "".join([d.value[2] for d in Direction])
@@ -57,28 +57,25 @@ class TodaysPuzzle(Puzzle):
                 # ok, valid movement
                 guard_pos = next_position
 
-    def get_guard_block_to_loop_positions(self):
+    def get_guard_block_to_loop_positions_count(self):
         guard_pos, current_direction = self.find_guard_position()
-        return self.go_to_exit_or_loop(True, None, guard_pos, current_direction)
+        return self.go_to_exit_or_loop(False, None, guard_pos, current_direction)
 
-    def go_to_exit_or_loop(self, search_loop=True,
-                           block_position: tuple[int, int] | None = None,
-                           guard_initial_pos: tuple[int, int] = (0, 0),
-                           direction: Direction = Direction.UP) -> tuple[int, int] | int:
+    def go_to_exit_or_loop(self, is_block_simulation, block_position: tuple[int, int] | None, guard_initial_pos: tuple[int, int], direction: Direction) -> tuple[int, int] | int:
         grid_width, grid_height = len(self.area[0]), len(self.area)
         possible_block_position_list = []
         current_guard_pos = guard_initial_pos
         while True:
 
             # we tray_trace the path from here to the exit.
-            if search_loop:
+            if not is_block_simulation:
                 # Can we loop from here?
                 for d, block_offset in [(d, (d.value[0], d.value[1])) for d in Direction]:
                     # we don't block the forward direction
                     if d == direction:
                         continue
                     possible_block_position = (guard_initial_pos[0] + block_offset[0], guard_initial_pos[1] + block_offset[1])
-                    loop = self.go_to_exit_or_loop(False, possible_block_position, guard_initial_pos, direction)
+                    loop = self.go_to_exit_or_loop(True, possible_block_position, guard_initial_pos, direction)
                     if type(loop) == tuple:
                         possible_block_position_list.append(possible_block_position)
 
@@ -94,7 +91,7 @@ class TodaysPuzzle(Puzzle):
                 return block_position
 
             # wall?
-            if self.area[next_position[1]][next_position[0]] == "#" or (not search_loop and next_position == possible_block_position):
+            if self.area[next_position[1]][next_position[0]] == "#" or (is_block_simulation and next_position == block_position):
                 direction = get_next_direction(direction)
             else:
                 # ok, valid movement
