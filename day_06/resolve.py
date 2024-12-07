@@ -10,58 +10,95 @@ class Direction(Enum):
     LEFT = (-1, 0, "<")
 
 
+def get_next_direction(current_direction) -> Direction:
+    direction_list = list(Direction)
+    return direction_list[(direction_list.index(current_direction) + 1) % len(direction_list)]
+
+
 class TodaysPuzzle(Puzzle):
     def __init__(self) -> None:
         super().__init__()
         self.area: list[list[str]] = []
-        self.guard_pos: tuple[int, int] = (0, 0)
-        self.current_direction: Direction = Direction.UP
-        self.guards_visited_position: int = 0
 
     def solve_step1(self) -> tuple[int | None, bool]:
         self.area = self.get_data_as_array()
-        return self.get_guard_positions(), True
+        return self.get_guard_visited_positions(), True
 
     def solve_step2(self) -> tuple[int | None, bool]:
         self.area = self.get_data_as_array()
-        return None, False
+        return self.get_guard_block_to_loop_positions(), True
 
-    def find_guard_position(self) -> None:
+    def find_guard_position(self) -> tuple[tuple[int, int], Direction] | None:
         directions = "".join([d.value[2] for d in Direction])
         for y, line in enumerate(self.area):
             for x, char in enumerate(line):
                 if char in directions:
-                    self.guard_pos = (x, y)
-                    self.current_direction = list(Direction)[directions.index(char)]
-                    return
+                    return (x, y), list(Direction)[directions.index(char)]
 
-    def get_next_position(self):
-        return tuple(map(lambda i, j: i + j, self.guard_pos, self.current_direction.value))
-
-    def get_next_direction(self):
-        direction_list = list(Direction)
-        self.current_direction = direction_list[(direction_list.index(self.current_direction) + 1) % len(direction_list)]
-
-    def get_guard_positions(self):
-        w, h = len(self.area[0]), len(self.area)
-        self.find_guard_position()
+    def get_guard_visited_positions(self):
+        grid_width, grid_height = len(self.area[0]), len(self.area)
+        guard_pos: tuple[int, int]
+        current_direction: Direction
+        guard_pos, current_direction = self.find_guard_position()
         distinct_position = set()
 
         while True:
-            distinct_position.add(self.guard_pos)
-            self.area[self.guard_pos[1]][self.guard_pos[0]] = self.current_direction.value[2]
-            next_position = self.get_next_position()
+            distinct_position.add(guard_pos)
+            next_position = guard_pos[0] + current_direction.value[0], guard_pos[1] + current_direction.value[1]
 
             # exit?
-            if not next_position[0] in range(w) or not next_position[1] in range(h):
+            if not next_position[0] in range(grid_width) or not next_position[1] in range(grid_height):
                 return len(distinct_position)
 
             # wall?
             if self.area[next_position[1]][next_position[0]] == "#":
-                self.get_next_direction()
+                current_direction = get_next_direction(current_direction)
             else:
                 # ok, valid movement
-                self.guard_pos = next_position
+                guard_pos = next_position
+
+    def get_guard_block_to_loop_positions(self):
+        guard_pos, current_direction = self.find_guard_position()
+        return self.go_to_exit_or_loop(True, None, guard_pos, current_direction)
+
+    def go_to_exit_or_loop(self, search_loop=True,
+                           block_position: tuple[int, int] | None = None,
+                           guard_initial_pos: tuple[int, int] = (0, 0),
+                           direction: Direction = Direction.UP) -> tuple[int, int] | int:
+        grid_width, grid_height = len(self.area[0]), len(self.area)
+        possible_block_position_list = []
+        current_guard_pos = guard_initial_pos
+        while True:
+
+            # we tray_trace the path from here to the exit.
+            if search_loop:
+                # Can we loop from here?
+                for d, block_offset in [(d, (d.value[0], d.value[1])) for d in Direction]:
+                    # we don't block the forward direction
+                    if d == direction:
+                        continue
+                    possible_block_position = (guard_initial_pos[0] + block_offset[0], guard_initial_pos[1] + block_offset[1])
+                    loop = self.go_to_exit_or_loop(False, possible_block_position, guard_initial_pos, direction)
+                    if type(loop) == tuple:
+                        possible_block_position_list.append(possible_block_position)
+
+            next_position = current_guard_pos[0] + direction.value[0], current_guard_pos[1] + direction.value[1]
+
+            # exit?
+            if not next_position[0] in range(grid_width) or not next_position[1] in range(grid_height):
+                return len(possible_block_position_list)
+
+            # a loop? give the block position
+            if next_position == guard_initial_pos:
+                print(f"block position: {block_position}")
+                return block_position
+
+            # wall?
+            if self.area[next_position[1]][next_position[0]] == "#" or (not search_loop and next_position == possible_block_position):
+                direction = get_next_direction(direction)
+            else:
+                # ok, valid movement
+                current_guard_pos = next_position
 
 
 if __name__ == "__main__":
