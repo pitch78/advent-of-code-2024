@@ -1,4 +1,7 @@
+from math import log, ceil
 from operator import concat
+
+from numpy import floor
 
 from common.Puzzle import Puzzle
 
@@ -29,9 +32,10 @@ class TodaysPuzzle(Puzzle):
         for number in number_list[1:]:
             possible_response_next: list[int] = []
             for response in possible_responses:
-                if pp_operator(response, number) == expected_response:
+                pp_value = pp_operator(response, number)
+                if pp_value == expected_response:
                     return expected_response
-                possible_response_next.append(pp_operator(response, number))
+                possible_response_next.append(pp_value)
                 if response + number == expected_response:
                     return expected_response
                 possible_response_next.append(response + number)
@@ -82,7 +86,20 @@ class TodaysPuzzle(Puzzle):
 
 
 def pp_operator(a, b):
-    return int(str(a) + str(b))
+    if b < 10:
+        return 10 * a + b
+    elif b < 100:
+        return 100 * a + b
+    elif b < 1000:
+        return 1000 * a + b
+    elif b < 10000:
+        return 10000 * a + b
+    else:
+        return 100000 * a + b
+    # return a * 10 ** int(floor(log(b, 10))+1) + b
+
+    # return int(f"{a}{b}")
+    # return int(str(a) + str(b))
 
 
 if __name__ == "__main__":
