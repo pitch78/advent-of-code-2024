@@ -5,10 +5,10 @@ class TodaysPuzzle(Puzzle):
     def __init__(self) -> None:
         super().__init__()
 
-    def solve_step1(self) -> tuple[str | None, bool]:
+    def solve_step1(self) -> tuple[int | str | None, bool]:
         return None, False
 
-    def solve_step2(self) -> tuple[str | None, bool]:
+    def solve_step2(self) -> tuple[int | str | None, bool]:
         return None, False
 
 
