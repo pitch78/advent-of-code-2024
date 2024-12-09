@@ -72,6 +72,7 @@ class TodaysPuzzle(Puzzle):
                 # Can we loop from here?
                 for d, block_offset in [(d, (d.value[0], d.value[1])) for d in Direction]:
                     # we don't block the forward direction
+
                     if d == direction:
                         continue
                     possible_block_position = (guard_initial_pos[0] + block_offset[0], guard_initial_pos[1] + block_offset[1])
