@@ -8,7 +8,7 @@ import requests
 
 from common.Loader import Loader
 
-my_aoc_cookie: str = "53616c7465645f5f017253dfa9178e7b198b889953ea989d7ba95ed98fb89fe07a44fa5971b1edb19040f736b7532ffc686f37a7a8babf7e30b853d80f3e5370"
+my_aoc_cookie: str = ""
 current_aoc_year = 2024
 
 
