@@ -20,6 +20,9 @@ class Loader:
         self._thread.start()
         return self
 
+    def is_alive(self):
+        return self._thread.is_alive()
+
     def _animate(self):
         for c in cycle(self._steps):
             if self._done:

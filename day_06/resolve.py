@@ -65,30 +65,26 @@ class TodaysPuzzle(Puzzle):
         grid_width, grid_height = len(self.area[0]), len(self.area)
         possible_block_position_list = []
         current_guard_pos = guard_initial_pos
+        nb_guard_steps = 0
         while True:
-
+            nb_guard_steps+=1
             # we tray_trace the path from here to the exit.
             if not is_block_simulation:
                 # Can we loop from here?
                 for d, block_offset in [(d, (d.value[0], d.value[1])) for d in Direction]:
                     # we don't block the forward direction
-
-                    if d == direction:
-                        continue
-                    possible_block_position = (guard_initial_pos[0] + block_offset[0], guard_initial_pos[1] + block_offset[1])
-                    loop = self.go_to_exit_or_loop(True, possible_block_position, guard_initial_pos, direction)
+                    possible_block_position = (current_guard_pos[0] + block_offset[0], current_guard_pos[1] + block_offset[1])
+                    # imperative to start from initial pos. not the same result from current Pos
+                    loop = self.go_to_exit_or_loop(True, possible_block_position, guard_initial_pos, Direction.UP)
                     if type(loop) == tuple:
                         possible_block_position_list.append(possible_block_position)
 
             next_position = current_guard_pos[0] + direction.value[0], current_guard_pos[1] + direction.value[1]
-
             # exit?
             if not next_position[0] in range(grid_width) or not next_position[1] in range(grid_height):
-                return len(possible_block_position_list)
+                return len(set(possible_block_position_list))
 
-            # a loop? give the block position
-            if next_position == guard_initial_pos:
-                print(f"block position: {block_position}")
+            if nb_guard_steps > 10000:
                 return block_position
 
             # wall?

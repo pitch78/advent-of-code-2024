@@ -22,7 +22,7 @@ class Puzzle:
         with open(f"./input{'' if self.mode == Mode.PROD else '_test'}{step_2_extension}", "r") as input_file:
             self.raw_items = [item for item in input_file.read().split(self.split_by)]
 
-            #remove trailing blank lines
+            # remove trailing blank lines
             while len(self.raw_items[-1].strip()) == 0:
                 del self.raw_items[-1]
 
