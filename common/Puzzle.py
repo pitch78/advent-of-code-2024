@@ -13,6 +13,7 @@ class Puzzle:
         self.step: Step = step
         self.split_by: str = split_by
         self.raw_items: list[str] = []
+        self.step_loader: Loader| None = None
         self.load_data()
 
     def load_data(self) -> None:
@@ -41,7 +42,7 @@ class Puzzle:
 
     # Wrapper around, current day solvers. Handle execution timing and response display
     def resolve(self, expected_result: int = None) -> None:
-        step_loader = Loader(f"Part#{self.step.value} {self.mode.value}").start()
+        self.step_loader = Loader(f"Part#{self.step.value} {self.mode.value}").start()
         start = time()
         if self.step == Step.STEP_1:
             solution, found = self.solve_step1()
@@ -49,9 +50,13 @@ class Puzzle:
             solution, found = self.solve_step2()
         end = time()
         must_exit, sum_up = self.__display_current_solution(expected_result, solution, found, end - start)
-        step_loader.stop(sum_up, not must_exit)
+        self.step_loader.stop(sum_up, not must_exit)
         if must_exit:
             exit()
+
+    def progress(self, value: int) -> None:
+        if self.step_loader is not None:
+            self.step_loader.progress(value)
 
     # No response, no solution found
     def solve_step1(self) -> tuple[str | None, bool]:
