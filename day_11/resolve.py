@@ -1,5 +1,3 @@
-from memoize.wrapper import memoize
-
 from common.Puzzle import Puzzle
 
 

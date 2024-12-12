@@ -1,10 +1,12 @@
 import os.path
 from time import time
-from typing import Callable
+from typing import Callable, TypeVar
 
 from common.Loader import Loader
 from common.Mode import Mode
 from common.Step import Step
+
+T = TypeVar("T")
 
 
 class Puzzle:
@@ -13,7 +15,7 @@ class Puzzle:
         self.step: Step = step
         self.split_by: str = split_by
         self.raw_items: list[str] = []
-        self.step_loader: Loader| None = None
+        self.step_loader: Loader | None = None
         self.load_data()
 
     def load_data(self) -> None:
@@ -37,8 +39,8 @@ class Puzzle:
         for item in self.area:
             print("".join(item))
 
-    def get_data_as_array(self, transform: Callable[[str], str | int] = None) -> list[list[str | int]]:
-        return [list(line) if transform is None else [transform(item) for item in line] for line in self.raw_items]
+    def get_data_as_array(self, transform: Callable[[int, int, str], T] = None) -> list[list[str | T]]:
+        return [list(line) if transform is None else [transform(column_index, line_index, item) for column_index, item in enumerate(line)] for line_index, line in enumerate(self.raw_items)]
 
     # Wrapper around, current day solvers. Handle execution timing and response display
     def resolve(self, expected_result: int = None) -> None:
