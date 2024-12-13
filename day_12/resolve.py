@@ -173,7 +173,7 @@ class TodaysPuzzle(Puzzle):
         # print(f"list: {list_region_visited}")
         distinct_visited_region = list(set(list_region_visited))
         if len(distinct_visited_region) == 1 and distinct_visited_region[0] != -1:
-            print(f"{nb_sides} more sides for region #{distinct_visited_region[0]}")
+            # print(f"{nb_sides} more sides for region #{distinct_visited_region[0]}")
             self.regions[distinct_visited_region[0]].sides += nb_sides
         region.sides = nb_sides
 
