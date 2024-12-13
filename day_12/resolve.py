@@ -18,11 +18,17 @@ class Plant():
         return self.__str__()
 
 
+class Region():
+    def __init__(self, plant_list: list[Plant]) -> None:
+        self.plant_list: list[Plant] = plant_list
+        self.sides: int = 0
+
+
 class TodaysPuzzle(Puzzle):
     def __init__(self) -> None:
         super().__init__()
         self.enriched_area: list[list[Plant]] = []
-        self.regions: list[list[Plant]] = []
+        self.regions: list[list[Plant] | Region] = []
         self.current_region_index = 0
         self.width, self.height = -1, -1
 
@@ -89,22 +95,28 @@ class TodaysPuzzle(Puzzle):
                 self.inspect_region_of(self.enriched_area[row][col])
                 # self.print_regions()
 
-        result = 0
+        self.regions = [Region(list_plant) for list_plant in self.regions]
         for r_index, region in enumerate(self.regions):
-            nb_sides = self.check_sides_of(region)
-            print(f"Region #{r_index}('{region[0].region_char}'): A:{len(region)}, P:{sum([p.external_sides for p in region])}, S: {nb_sides}")
-            result += len(region) * nb_sides
+            self.check_sides_of(region)
+            # print(f"Region #{r_index}('{region.plant_list[0].region_char}'): A:{len(region.plant_list)}, P:{sum([p.external_sides for p in region.plant_list])}, S: {region.sides}")
+
+        # need a second loop as later region can be nested in earlier one
+        result = 0
+        for region in self.regions:
+            result += len(region.plant_list) * region.sides
         # 3) détecter les zones imbriquées et ajouter les bords à la zone qui la contient
         return result, True
 
-    def check_sides_of(self, region: list[Plant]) -> int:
+    def check_sides_of(self, region: Region) -> None:
+        pl = region.plant_list
         # 2) go around (meaning 1 plant outside), until looping.
         # initially one block upper, going left, meaning the first block is on our right
-        initial_pos_x, initial_pos_y = region[0].x + directions[0][0], region[0].y + directions[0][1]
+        initial_pos_x, initial_pos_y = pl[0].x + directions[0][0], pl[0].y + directions[0][1]
         initial_dir_index = 1
         current_pos_x, current_pos_y, current_dir_index = initial_pos_x, initial_pos_y, 1
         nb_sides = 0
-        current_region_id = region[0].region_id
+        current_region_id = pl[0].region_id
+        list_region_visited: list[int] = []
         # loop closed?
         while not (nb_sides > 0 and current_pos_x == initial_pos_x and current_pos_y == initial_pos_y and current_dir_index == initial_dir_index):
             # print(f"Checking {current_pos_x},{current_pos_y} => {current_dir_index}...")
@@ -125,14 +137,29 @@ class TodaysPuzzle(Puzzle):
             if front_other_region and right_in_region:
                 current_pos_x += directions[current_dir_index][0]
                 current_pos_y += directions[current_dir_index][1]
+                if current_pos_x in range(self.width) and current_pos_y in range(self.height):
+                    list_region_visited.append(self.enriched_area[current_pos_y][current_pos_x].region_id)
+                else:
+                    list_region_visited.append(-1)
                 continue
 
             # Turn right + move forward
-            if front_other_region and right_other_region:
+            # no matter Front status, as we need to turn
+            # if front_other_region and right_other_region:
+            if right_other_region:
                 current_dir_index = (current_dir_index + 1) % 4
                 nb_sides += 1
                 current_pos_x += directions[current_dir_index][0]
                 current_pos_y += directions[current_dir_index][1]
+                # We remove last appended id, as diagonal are taken into account
+                if len(list_region_visited) > 0:
+                    list_region_visited.pop()
+
+                # Then add current pos
+                if current_pos_x in range(self.width) and current_pos_y in range(self.height):
+                    list_region_visited.append(self.enriched_area[current_pos_y][current_pos_x].region_id)
+                else:
+                    list_region_visited.append(-1)
                 continue
 
             # Turn left
@@ -142,8 +169,13 @@ class TodaysPuzzle(Puzzle):
                 continue
 
             print("🤔")
-
-        return nb_sides
+        # print()
+        # print(f"list: {list_region_visited}")
+        distinct_visited_region = list(set(list_region_visited))
+        if len(distinct_visited_region) == 1 and distinct_visited_region[0] != -1:
+            print(f"{nb_sides} more sides for region #{distinct_visited_region[0]}")
+            self.regions[distinct_visited_region[0]].sides += nb_sides
+        region.sides = nb_sides
 
 
 if __name__ == "__main__":
@@ -159,7 +191,7 @@ if __name__ == "__main__":
     print()
     # then step_2, test_mode
     today_s_puzzle.step2()
-    today_s_puzzle.resolve(236)
+    today_s_puzzle.resolve(1206)
 
     # then step_2, prod_mode
     today_s_puzzle.prod_mode()
