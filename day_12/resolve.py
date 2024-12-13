@@ -37,7 +37,7 @@ class TodaysPuzzle(Puzzle):
 
         result = 0
         for r_index, region in enumerate(self.regions):
-            print(f"Region #{r_index}('{region[0].region_char}'): A:{len(region)}, P:{sum([p.external_sides for p in region])}")
+            # print(f"Region #{r_index}('{region[0].region_char}'): A:{len(region)}, P:{sum([p.external_sides for p in region])}")
             result += len(region) * sum([p.external_sides for p in region])
 
         return result, True
@@ -94,9 +94,8 @@ class TodaysPuzzle(Puzzle):
             nb_sides = self.check_sides_of(region)
             print(f"Region #{r_index}('{region[0].region_char}'): A:{len(region)}, P:{sum([p.external_sides for p in region])}, S: {nb_sides}")
             result += len(region) * nb_sides
-
         # 3) détecter les zones imbriquées et ajouter les bords à la zone qui la contient
-        return None, False
+        return result, True
 
     def check_sides_of(self, region: list[Plant]) -> int:
         # 2) go around (meaning 1 plant outside), until looping.
@@ -108,20 +107,41 @@ class TodaysPuzzle(Puzzle):
         current_region_id = region[0].region_id
         # loop closed?
         while not (nb_sides > 0 and current_pos_x == initial_pos_x and current_pos_y == initial_pos_y and current_dir_index == initial_dir_index):
-            # we must keep block of the region on our right
-            # so one step in the current direction
-            current_pos_x += directions[current_dir_index][0]
-            current_pos_y += directions[current_dir_index][1]
+            # print(f"Checking {current_pos_x},{current_pos_y} => {current_dir_index}...")
+
+            block_in_the_front_x = current_pos_x + directions[current_dir_index][0]
+            block_in_the_front_y = current_pos_y + directions[current_dir_index][1]
+            front_out = not (block_in_the_front_x in range(self.width) and block_in_the_front_y in range(self.height))
+            front_other_region = front_out or self.enriched_area[block_in_the_front_y][block_in_the_front_x].region_id != current_region_id
+            front_in_region = not front_out and self.enriched_area[block_in_the_front_y][block_in_the_front_x].region_id == current_region_id
+
             block_on_the_right_x = current_pos_x + directions[(current_dir_index + 1) % 4][0]
             block_on_the_right_y = current_pos_y + directions[(current_dir_index + 1) % 4][1]
-            if block_on_the_right_x in range(self.width) and block_on_the_right_y in range(self.height):
-                inner_pos = self.enriched_area[block_on_the_right_y][block_on_the_right_x]
-                if inner_pos.region_id == current_region_id:
-                    continue
+            right_out = not (block_on_the_right_x in range(self.width) and block_on_the_right_y in range(self.height))
+            right_other_region = right_out or self.enriched_area[block_on_the_right_y][block_on_the_right_x].region_id != current_region_id
+            right_in_region = not right_out and self.enriched_area[block_on_the_right_y][block_on_the_right_x].region_id == current_region_id
 
-            # not in the region anymore, we turn right
-            current_dir_index = (current_dir_index + 1) % 4
-            nb_sides += 1
+            # Move forward
+            if front_other_region and right_in_region:
+                current_pos_x += directions[current_dir_index][0]
+                current_pos_y += directions[current_dir_index][1]
+                continue
+
+            # Turn right + move forward
+            if front_other_region and right_other_region:
+                current_dir_index = (current_dir_index + 1) % 4
+                nb_sides += 1
+                current_pos_x += directions[current_dir_index][0]
+                current_pos_y += directions[current_dir_index][1]
+                continue
+
+            # Turn left
+            if front_in_region and right_in_region:
+                current_dir_index = (current_dir_index - 1) % 4
+                nb_sides += 1
+                continue
+
+            print("🤔")
 
         return nb_sides
 
@@ -139,7 +159,7 @@ if __name__ == "__main__":
     print()
     # then step_2, test_mode
     today_s_puzzle.step2()
-    today_s_puzzle.resolve(80)
+    today_s_puzzle.resolve(236)
 
     # then step_2, prod_mode
     today_s_puzzle.prod_mode()
