@@ -56,7 +56,7 @@ class Puzzle:
         if must_exit:
             exit()
 
-    def progress(self, value: int) -> None:
+    def progress(self, value: int | str) -> None:
         if self.step_loader is not None:
             self.step_loader.progress(value)
 

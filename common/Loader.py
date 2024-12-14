@@ -33,8 +33,8 @@ class Loader:
     def __enter__(self):
         self.start()
 
-    def progress(self, value):
-        self._progress = f"{value}%"
+    def progress(self, value, suffix: str = ""):
+        self._progress = f" {value}{suffix}"
 
     def stop(self, result_description: str = None, success: bool = True):
         if result_description != None:
