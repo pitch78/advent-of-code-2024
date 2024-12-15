@@ -134,7 +134,7 @@ if __name__ == "__main__":
     print()
     # then step_2, test_mode
     today_s_puzzle.step2()
-    # today_s_puzzle.resolve(1000)
+    # today_s_puzzle.resolve()
 
     # then step_2, prod_mode
     today_s_puzzle.prod_mode()
