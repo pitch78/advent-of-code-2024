@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class ColorUtils():
+    # effects
     reset = "\x1b[0m"
     bright = "\x1b[1m"
     dim = "\x1b[2m"
@@ -9,6 +10,8 @@ class ColorUtils():
     blink = "\x1b[5m"
     reverse = "\x1b[7m"
     hidden = "\x1b[8m"
+
+    # font color
     black = "\x1b[30m"
     red = "\x1b[31m"
     green = "\x1b[32m"
@@ -17,6 +20,8 @@ class ColorUtils():
     magenta = "\x1b[35m"
     cyan = "\x1b[36m"
     white = "\x1b[37m"
+
+    # background colors
     BGblack = "\x1b[40m"
     BGred = "\x1b[41m"
     BGgreen = "\x1b[42m"
