@@ -105,34 +105,54 @@ class TodaysPuzzle(Puzzle):
             return
 
         initial_check_pos = pos_forward
-        while item_at_pos_forward != "#" and item_at_pos_forward != ".":
-            pos_forward = pos_forward[0] + direction[0], pos_forward[1] + direction[1]
-            item_at_pos_forward = self.room_plan[pos_forward[1]][pos_forward[0]]
+        if mvt in ["<", ">"]:
+            while item_at_pos_forward != "#" and item_at_pos_forward != ".":
+                pos_forward = pos_forward[0] + direction[0], pos_forward[1] + direction[1]
+                item_at_pos_forward = self.room_plan[pos_forward[1]][pos_forward[0]]
 
-        # wall? nothing to do
-        if item_at_pos_forward == "#":
-            return
+            # wall? nothing to do
+            if item_at_pos_forward == "#":
+                return
 
-        # space? we move all the block one by one
-        # horizontal move ?
-        if mvt == ">":
-            for x in range(pos_forward[0] - 1, initial_check_pos[0], -1):
-                self.room_plan[pos_forward[1]][x + 1] = self.room_plan[pos_forward[1]][x]
-        elif mvt == "<":
-            for x in range(pos_forward[0], initial_check_pos[0]):
-                self.room_plan[pos_forward[1]][x] = self.room_plan[pos_forward[1]][x + 1]
+            # space? we move all the block one by one
+            # horizontal move ?
+            if mvt == ">":
+                for x in range(pos_forward[0] - 1, initial_check_pos[0] - 1, -1):
+                    self.room_plan[pos_forward[1]][x + 1] = self.room_plan[pos_forward[1]][x]
+            else:
+                for x in range(pos_forward[0], initial_check_pos[0]):
+                    self.room_plan[pos_forward[1]][x] = self.room_plan[pos_forward[1]][x + 1]
+
+            # then the robot
+            self.room_plan[self.robot_position[1]][self.robot_position[0]] = "."
+            self.robot_position = initial_check_pos
+            self.room_plan[initial_check_pos[1]][initial_check_pos[0]] = "@"
+
+        if mvt == "^":
+            self.move_up([pos_forward])
         elif mvt == "^":
-            self.move_up([pos_forward, ])
-        elif mvt == "^":
-            pass
+            self.move_down([pos_forward])
         else:
             print("unknown move 🤨")
 
+    def move_up(self, positions_to_test: list[tuple[int, int]]) -> bool:
+        if self.room_plan[positions_to_test[0][1]][positions_to_test[0][0]] == "]":
+            # adding "[" pos as first item of the list
+            positions_to_test.insert(0, (positions_to_test[0][0] - 1, positions_to_test[0][1]))
+        if self.room_plan[positions_to_test[-1][1]][positions_to_test[-1][0]] == "[":
+            # adding "]" pos as last item of the list
+            positions_to_test.append((positions_to_test[0][0] + 1, positions_to_test[0][1]))
+        for pos in positions_to_test:
+            if self.room_plan[pos[1]][pos[0] - 1] == "#":
+                return False
+            if self.room_plan[pos[1]][pos[0] - 1] in ["[", "]"]:
+                return self.move_up([(p[0], p[1] - 1) for p in positions_to_test])
 
-        # then the robot
-        self.room_plan[self.robot_position[1]][self.robot_position[0]] = "."
-        self.robot_position = initial_check_pos
-        self.room_plan[initial_check_pos[1]][initial_check_pos[0]] = "@"
+        return True
+        if self.move_up(positions_to_test):
+
+    def move_down(self, positions_to_test: list[tuple[int, int]]) -> bool:
+        pass
 
     def get_blocks_gps(self) -> int:
         gps = 0
