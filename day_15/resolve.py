@@ -1,4 +1,8 @@
+import os
+from time import sleep
+
 from common.ColorUtils import ColorUtils
+from common.Mode import Mode
 from common.Puzzle import Puzzle
 
 movements = {
@@ -26,17 +30,17 @@ class TodaysPuzzle(Puzzle):
         for line in self.raw_items[1].split("\n"):
             self.robot_instructions.extend(list(line))
 
-        for mvt in self.robot_instructions:
+        for index_mvt, mvt in enumerate(self.robot_instructions):
             self.move(mvt)
-            # self.display_plan(mvt)
+            self.display_plan(mvt, index_mvt)
         return self.get_blocks_gps(), True
 
-    def display_plan(self, mvt):
-        print()
-        print(f"mvt: {ColorUtils.cyan}{mvt}")
+    def display_plan(self, mvt, index):
+        os.system('clear')
+        print(f"mvt: {ColorUtils.cyan}{mvt} ({index})")
         for line in self.room_plan:
             print("".join(line)
-                  .replace("@", ColorUtils.BGwhite + ColorUtils.black + ColorUtils.blink + "@" + ColorUtils.reset)
+                  .replace("@", ColorUtils.bright + ColorUtils.blue + mvt + ColorUtils.reset)
                   .replace("O", ColorUtils.yellow + "O")
                   .replace("[]", ColorUtils.yellow + "[]")
                   .replace("#", ColorUtils.red + "#")
@@ -146,37 +150,12 @@ class TodaysPuzzle(Puzzle):
             exit()
 
     def move_up(self, positions_to_test: list[tuple[int, int]]) -> bool:
-        # do we need to extend the range?
-        if self.room_plan[positions_to_test[0][1]][positions_to_test[0][0]] == "]":
-            # adding "[" pos as first item of the list
-            positions_to_test.insert(0, (positions_to_test[0][0] - 1, positions_to_test[0][1]))
-        if self.room_plan[positions_to_test[-1][1]][positions_to_test[-1][0]] == "[":
-            # adding "]" pos as last item of the list
-            positions_to_test.append((positions_to_test[-1][0] + 1, positions_to_test[-1][1]))
-
-        positions_to_test = [p for p in positions_to_test if self.room_plan[p[1]][p[0]] != "."]
-
-        # checking row above
-        row_above_ok = True
-        for pos in positions_to_test:
-            if self.room_plan[pos[1] - 1][pos[0]] == "#":
-                row_above_ok = False
-                break
-            if self.room_plan[pos[1] - 1][pos[0]] in ["[", "]"] and not self.move_up([(p[0], p[1] - 1) for p in positions_to_test]):
-                row_above_ok = False
-                break
-        if not row_above_ok:
-            return False
-
-        # then move the block
-        for pos in positions_to_test:
-            self.room_plan[pos[1] - 1][pos[0]] = self.room_plan[pos[1]][pos[0]]
-            # self.display_plan("^")
-            self.room_plan[pos[1]][pos[0]] = "."
-        # self.display_plan("^")
-        return True
+        return self.move_vertically(-1, positions_to_test)
 
     def move_down(self, positions_to_test: list[tuple[int, int]]) -> bool:
+        return self.move_vertically(1, positions_to_test)
+
+    def move_vertically(self, offset:int, positions_to_test: list[tuple[int, int]]) -> bool:
         # do we need to extend the range?
         if self.room_plan[positions_to_test[0][1]][positions_to_test[0][0]] == "]":
             # adding "[" pos as first item of the list
@@ -185,30 +164,31 @@ class TodaysPuzzle(Puzzle):
             # adding "]" pos as last item of the list
             positions_to_test.append((positions_to_test[-1][0] + 1, positions_to_test[-1][1]))
 
+        # filtering out position that aren't blocks
         positions_to_test = [p for p in positions_to_test if self.room_plan[p[1]][p[0]] != "."]
 
-        # checking row above
-        char_line_below = [self.room_plan[pos[1] + 1][pos[0]] for pos in positions_to_test]
-        if all(char == "#" for char in char_line_below):
+        # checking next row
+        chars_next_line = [self.room_plan[pos[1] + offset][pos[0]] for pos in positions_to_test]
+        if "#" in chars_next_line:
             return False
 
         # not all clear? => need to check, then if not ok => give up
-        if not all(char == "." for char in char_line_below) and not self.move_down([(p[0], p[1] + 1) for p in positions_to_test if self.room_plan[p[1]][p[0]] in ["[", "]"]]):
+        if not all(char == "." for char in chars_next_line) and not self.move_vertically(offset, [(p[0], p[1] + offset) for p in positions_to_test]):
             return False
 
         # then move the block
         for pos in positions_to_test:
-            self.room_plan[pos[1] + 1][pos[0]] = self.room_plan[pos[1]][pos[0]]
-            # self.display_plan("v")
+            self.room_plan[pos[1] + offset][pos[0]] = self.room_plan[pos[1]][pos[0]]
+            # self.display_plan("^")
             self.room_plan[pos[1]][pos[0]] = "."
-        # self.display_plan("v")
+        # self.display_plan("^")
         return True
 
     def get_blocks_gps(self) -> int:
         gps = 0
         for y, line in enumerate(self.room_plan):
             for x, char in enumerate(line):
-                if char in ["O", "["]:
+                if char in "O[":
                     gps += x + y * 100
         return gps
 
@@ -229,9 +209,11 @@ class TodaysPuzzle(Puzzle):
 
         #         self.display_plan("?")
         for index_mvt, mvt in enumerate(self.robot_instructions):
+            # if self.mode == Mode.PROD and index_mvt > 1800:
+            # if self.mode == Mode.PROD and index_mvt > 1660:
+            #     self.display_plan(mvt, index_mvt)
+                # sleep(0.5)
             self.move_step2(mvt)
-            if index_mvt > 7174:
-                self.display_plan(mvt)
         return self.get_blocks_gps(), True
 
 
